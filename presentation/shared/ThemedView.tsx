@@ -15,7 +15,8 @@ export default function ThemedView({
     margin = false,
     safe = false,
     bgColor,
-    children
+    children, 
+    ...rest
 }: Props ) {
 
     const backgroundColor = bgColor ?? useThemeColor({}, 'background')
@@ -33,6 +34,7 @@ export default function ThemedView({
                 style
             ]}
             className={className}
+            {...rest}
         >
             {children}
         </View>
