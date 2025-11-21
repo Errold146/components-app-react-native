@@ -1,10 +1,141 @@
-import { View, Text } from 'react-native';
+import { router } from 'expo-router';
+import { useRef, useState } from 'react';
+import {
+	FlatList,
+	Image,
+	ImageSourcePropType,
+	NativeScrollEvent,
+	NativeSyntheticEvent,
+	useWindowDimensions
+} from 'react-native';
+
+import { ThemedButton, ThemedText, ThemedView } from '@/presentation';
+
+
+interface Slide {
+	title: string;
+	desc: string;
+	img: ImageSourcePropType;
+}
+
+const items: Slide[] = [
+	{
+		title: 'Titulo 1',
+		desc: 'Ea et eu enim fugiat sunt reprehenderit sunt aute quis tempor ipsum cupidatat et.',
+		img: require('../../assets/images/slides/slide-1.png'),
+	},
+	{
+		title: 'Titulo 2',
+		desc: 'Anim est quis elit proident magna quis cupidatat curlpa labore Lorem ea. Exercitation mollit velit in aliquip tempor occaecat dolor minim amet dolor enim cillum excepteur. ',
+		img: require('../../assets/images/slides/slide-2.png'),
+	},
+	{
+		title: 'Titulo 3',
+		desc: 'Ex amet duis amet nulla. Aliquip ea Lorem ea culpa consequat proident. Nulla tempor esse ad tempor sit amet Lorem. Velit ea labore aute pariatur commodo duis veniam enim.',
+		img: require('../../assets/images/slides/slide-3.png'),
+	},
+];
 
 const SlidesScreen = () => {
-  return (
-    <View>
-      <Text>SlidesScreen</Text>
-    </View>
-  );
+
+	const flatListRef = useRef<FlatList>(null)
+	const [currentSlideIndex, setCurrentSlideIndex] = useState(0)
+	const [scrollEnable, setScrollEnable] = useState(false)
+
+	const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+		if ( scrollEnable ) return;
+
+		const { contentOffset, layoutMeasurement } = event.nativeEvent
+		const currentIndex = Math.floor(contentOffset.x / layoutMeasurement.width)
+
+		setCurrentSlideIndex( currentIndex > 0 ? currentIndex : 0 )
+
+		if ( currentIndex === items.length - 1 ) {
+			setScrollEnable( true )
+		}
+	}
+
+	const scrollToSlide = (index: number) => {
+		if ( !flatListRef.current ) return;
+
+		flatListRef.current.scrollToIndex({
+			index,
+			animated: true 
+		})
+	}
+
+	return (
+		<ThemedView margin>
+			<FlatList 
+				data={items}
+				ref={flatListRef}
+				keyExtractor={item => item.title}
+				renderItem={ ({item}) => (
+					<SlideItem item={item} />
+				)}
+				horizontal
+				scrollEnabled={scrollEnable}
+				onScroll={onScroll}
+			/>
+
+			{
+				(currentSlideIndex === items.length - 1)
+				? (
+					<ThemedButton 
+						className='absolute bottom-12 right-5 w-[150px]'
+						onPress={() => router.dismiss()}
+					>
+						Finalizar
+					</ThemedButton>
+				) : (
+					<ThemedButton 
+						className='absolute bottom-12 right-5 w-[150px]'
+						onPress={() => scrollToSlide( currentSlideIndex + 1 )}
+					>
+						Siguiente
+					</ThemedButton>
+
+				)
+			}
+		</ThemedView>
+	);
 };
 export default SlidesScreen;
+
+
+interface SlideItemProps {
+	item: Slide
+}
+
+const SlideItem = ({ item }: SlideItemProps) => {
+
+	const { width } = useWindowDimensions()
+	const { title, desc, img } = item
+
+	return (
+		<ThemedView
+			className='flex-1 rounded p-10 justify-center items-center bg-indigo-500'
+			style={{ width }}
+		>
+			<Image 
+				source={ img }
+				style={{
+					width: width * 0.7,
+					height: width * 0.7,
+					resizeMode: 'center',
+					alignSelf: 'center'
+				}}
+			/>
+
+			<ThemedText 
+				type='h1' 
+				className='text-ligth-primary dark:text-dark-primary text-center'
+			>{title}</ThemedText>
+
+			<ThemedText
+				type='h2'
+				className='mt-10'
+			>{desc}</ThemedText>
+		</ThemedView>
+	)
+}

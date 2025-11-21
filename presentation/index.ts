@@ -1,5 +1,7 @@
 export { default as MenuItem } from './menu/MenuItem';
 
+export { default as FadeInImage } from './images/FadeInImage';
+
 export { default as ThemedButton } from './shared/ThemedButton';
 export { default as ThemedCard } from './shared/ThemedCard';
 export { default as ThemedInput } from './shared/ThemedInput';
